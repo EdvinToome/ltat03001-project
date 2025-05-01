@@ -21,9 +21,6 @@ digital products to WooCommerce in three simple steps.
 2. **Create these directories** at project root:  
 assets/ ── put your PNG templates/watermarks here input/ ── drop your source PNGs & ZIPs here output/ ── pipelines write into here
 
-markdown
-Copy
-Edit
 3. **Populate `assets/`** with:
 - `dark.png`
 - `bright.png`
