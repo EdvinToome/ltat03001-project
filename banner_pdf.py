@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # banner_pdf.py ───────────────────────────────────────────────────────────────
-# (Same logic as you provided, but all assets live under assets/.)
-
 from PIL import Image, ImageFilter
 import os
 import zipfile
@@ -71,6 +69,16 @@ shadow_opacity= 90
 shadow_color  = (0, 0, 0, shadow_opacity)
 
 # ============================
+#  NATURAL / NUMERIC SORT KEY
+# ============================
+def numeric_sort_key(path: Path):
+    stem = path.stem
+    try:
+        return int(stem)
+    except ValueError:
+        return stem.lower()
+
+# ============================
 #  HELPER FUNCTION: PROCESS IMAGE
 # ============================
 def process_single_image(image_path, out_subfolder, rename_banner=False):
@@ -110,9 +118,7 @@ def process_single_image(image_path, out_subfolder, rename_banner=False):
 
     # Save Banner
     if rename_banner:
-        out_path = out_subfolder / 'Banner.jpg'
-        banner.convert("RGB").save(out_path, "JPEG")
-        print(f"Banner saved: {out_path}")
+        out = out_subfolder / 'Banner.jpg'
     else:
         stem = Path(image_path).stem
         if stem in ['1','2','3','4']:
@@ -125,7 +131,8 @@ def process_single_image(image_path, out_subfolder, rename_banner=False):
 # ============================
 #  MAIN PROCESSING LOOP
 # ============================
-input_files = sorted(Path(input_folder).glob("*"), key=lambda x: x.name)
+# Sort input files numerically so "10.zip" comes after "2.zip"
+input_files = sorted(Path(input_folder).glob("*"), key=numeric_sort_key)
 
 for file in input_files:
     out_subfolder = Path(output_folder) / file.stem
@@ -144,7 +151,8 @@ for file in input_files:
         with tempfile.TemporaryDirectory() as td:
             with zipfile.ZipFile(file, 'r') as z:
                 z.extractall(td)
-            pngs = sorted(Path(td).rglob("*.png"), key=lambda x: x.name)
+            # Sort extracted PNGs numerically too
+            pngs = sorted(Path(td).rglob("*.png"), key=numeric_sort_key)
             for p in pngs:
                 print(f"  Processing extracted PNG: {p.name}")
                 pages.append(process_single_image(p, out_subfolder, rename_banner=False))
@@ -158,5 +166,3 @@ for file in input_files:
 
 print("Processing complete. Files saved to the 'output' folder.")
 
-if __name__ == "__main__":
-    pass
